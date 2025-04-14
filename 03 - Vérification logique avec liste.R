@@ -1,0 +1,70 @@
+#03 - Vérification logique avec liste
+
+library(cleaningtools)
+library(dplyr)
+
+my_raw_dataset <- cleaningtools::cleaningtools_raw_data
+my_kobo_survey <- cleaningtools::cleaningtools_survey
+my_kobo_choice <- cleaningtools::cleaningtools_choices
+
+# check_logical_with_list
+# Dans d’autres cas, la vérfication est spécifique et devrait être adapté à l’ensemble de données, par exemple, check_logical_with_list. 
+# Tout les vérifications logiques peut-ête écrites dans un fichier excel.
+
+library(readxl)
+
+logical_check_list <- readxl::read_excel("C:/Users/User/Downloads/01 - example - check_list.xlsx")
+logical_check_list
+
+# La liste de vérifications à 4 colonnes:
+
+# check_id : le nom de la vérification
+# description: la description de la vérification
+# check_to_perform: la vérfication à effectuer. Le format pour la vérification à effectuer doit prendre une forme basé sur tidyverse. 
+#Ce format est comme si un nouvel indicateur est créer avec un mutate. 
+#Ce nouvel indicateur doit être logique (c’est à dire, VRAI ou FAUX) avec VRAI quand la valeur doit être signalée.
+# columns_to_clean: les noms des colonnes qui sont utilisée pour la vérification (et aideront au nettoyage).
+
+# Cette liste peut être utlisée avec check_logical_with_list.
+
+example_logic <- my_raw_dataset %>% 
+  check_logical_with_list(uuid_column = "X_uuid",
+                          list_of_check = logical_check_list,
+                          check_id_column = "check_id",
+                          check_to_perform_column = "check_to_perform",
+                          columns_to_clean_column = "columns_to_clean",
+                          description_column = "description")
+
+example_logic$logical_all %>% 
+  head()
+
+
+# The registre(journal) renvoie :
+
+# uuid
+# question: pour toutes les variables présentes dans columns_to_clean
+# old value: pour toutes les variables présentes dans columns_to_clean
+# issue
+# check_id: identifiant pour la vérification logique
+# check_binding: la combinaison de check_id et uuid.
+#Une vérification peut être signalée sur plusieurs lignes, dans l’exemple au-dessus, pour chaque uuid, primary_livelihood et tot_expenses sont présents.
+
+
+# Le format pour la vérification à effectuer doit prendre une forme basé sur tidyverse. 
+# Ce format est comme si un nouvel indicateur est créer avec un mutate. 
+# Ce nouvel indicateur doit être logique (c’est à dire, VRAI ou FAUX) avec VRAI quand la valeur doit être signalée.
+
+my_raw_dataset %>% 
+  dplyr::mutate(xxx =  primary_livelihood.employment == 1 & tot_expenses < 200000) %>% 
+  dplyr::select(X_uuid, xxx, primary_livelihood.employment, tot_expenses) %>% 
+  head()
+
+# L’ensemble de donnée vérifié sera retourné avec des colonnes en plus, c’est à dire, une variable logique avec le nom de check_id.
+
+example_logic$checked_dataset[1:6,tail(names(example_logic$checked_dataset))]
+
+# 
+# Note
+# Si vous ne rajoutez pas columns_to_clean, la fonction check_logical_with_list essayera de deviner les variables. 
+# Il n’y a aucune garantie qu’elle lira ou choisira les bonnes variables.
+

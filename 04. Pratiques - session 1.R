@@ -1,0 +1,89 @@
+# 04. Pratique - session 1
+
+
+#Pratique
+
+# Pratique 1
+
+# Essayer les vérifications suivantes:
+  
+# Effectuez une vérification pour repérer les informations personnelles identifiables (PII)
+
+library(cleaningtools)
+library(dplyr)
+
+my_raw_dataset <- cleaningtools::cleaningtools_raw_data
+my_kobo_survey <- cleaningtools::cleaningtools_survey
+my_kobo_choice <- cleaningtools::cleaningtools_choices
+
+check_pii
+
+#Q1. Essayer les vérifications suivantes:
+  
+  #Effectuez une vérification pour repérer les informations personnelles identifiables (PII)
+
+my_raw_dataset %>%
+  check_pii(uuid_column = "X_uuid")
+
+#colnames(my_raw_dataset)
+
+# Pratique 2
+# Effectuez une vérification qui examinera les pourcentages de valeur manquante par observation et qui repérera toute observation qui est différente.
+
+my_data_with_missing <- my_raw_dataset %>% 
+  add_percentage_missing(kobo_survey = my_kobo_survey)
+
+my_data_with_missing %>% 
+  check_percentage_missing(uuid_column = "X_uuid")
+
+# Ou si vous utilisez déjà un journal / registre.
+
+a_log <- my_raw_dataset %>% 
+  check_pii(uuid_column = "X_uuid")
+a_log$checked_dataset <- a_log$checked_dataset %>% 
+  add_percentage_missing(kobo_survey = my_kobo_survey)
+a_log %>% 
+  check_percentage_missing(uuid_column = "X_uuid")
+
+
+# Pratique 3
+# Remplissez la liste de vérification Excel avec les vérications suivantes:
+  # le nombre de membre du ménage est supérieur à 8 (variable: num_hh_member).
+#la source d’eau pour la consomation est en bouteille (variable: water_source_drinking, value: bottled) et le ménage traite toujours son eau pour la consommation (variable: treat_drink_water, value: always_treat).
+#la source d’eau pour la consomation est en bouteille (variable: water_source_drinking, value: bottled) et une des raisons principales pour laquelle le ménage n’a pas assez d’eau est la pression de l’eau (variable: access_water_enough_why_not, value: water_pressure, c’est un choix multiple)
+
+
+exercise_check_list <- readxl::read_excel("C:/Users/User/Downloads/01 - example - check_list.xlsx")
+
+my_raw_dataset %>% 
+  check_logical_with_list(uuid_column = "X_uuid",
+                          list_of_check = exercise_check_list,
+                          check_id_column = "check_id",
+                          check_to_perform_column = "check_to_perform",
+                          columns_to_clean_column = "columns_to_clean",
+                          description_column = "description")
+
+
+
+###
+
+my_check_list <- data.frame(check_id = c("check_household number", "check_water_treatment", "check_3"),
+                            description = c("num_hh_member is big","using bottled water and always treat","using bottled water and main reason is water pressure"),
+                            check_to_perform = c("num_hh_member > 8","water_source_drinking == \"bottled\" & treat_drink_water == \"always_treat\"","water_source_drinking == \"bottled\" & access_water_enough_why_not.water_pressure == TRUE"),
+                            columns_to_clean = c("num_hh_member","water_source_drinking, treat_drink_water","water_source_drinking, access_water_enough_why_not.water_pressure"))
+
+my_raw_dataset %>% 
+  check_logical_with_list(uuid_column = "X_uuid",
+                          list_of_check = my_check_list,
+                          check_id_column = "check_id",
+                          check_to_perform_column = "check_to_perform",
+                          columns_to_clean_column = "columns_to_clean",
+                          description_column = "description")
+
+# Extra
+# Essayaer d’ajouter la durée à des fichiers audits.
+
+# create_audit_list() 
+# add_duration_from_audit()
+
+
