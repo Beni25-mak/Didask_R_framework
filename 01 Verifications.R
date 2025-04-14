@@ -1,6 +1,6 @@
 # Nettoyage - Vérifier un ensemble de données
 # Pipe-able
-# 01. Vérifications
+# 01. Vérifications 
 
 # Cleaning - Composition - Analysis - Outputs
 

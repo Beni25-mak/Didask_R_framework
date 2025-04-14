@@ -3,6 +3,15 @@
 # Tout d'abord, vous devrez installer les paquets nécessaires. Pour ce faire, vous pouvez installer la version de développement de cleaningtools depuis le
 # répertoire de cleaningtools sur GitHub avec :
 
+install.packages("devtools")
+install.packages("remotes")
+
+#Sys.which("make")
+
+
+#Sys.setenv(GITHUB_PAT = "ton_token_personnel")
+
+
 devtools::install_github("impact-initiatives/cleaningtools")
 
 #Alternativement, vous pouvez installer la version de développement de *analysistools* depuis le répertoire de *analysistools* sur GitHub
